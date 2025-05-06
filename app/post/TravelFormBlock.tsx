@@ -4,8 +4,45 @@ import { useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
+type HotelSpot = {
+  url: string;
+  rating: string;
+  comment: string;
+};
+
+type Cost = {
+  total: string;
+  flight: string;
+  hotel: string;
+  ticket: string;
+  transport: string;
+  food: string;
+  other: string;
+};
+
+type FormType = {
+  nickname: string;
+  team: string;
+  player: string;
+  month: string;
+  role: string;
+  match: string;
+  competition: string;
+  duration: string;
+  airline: string;
+  cities: string;
+  hotel: HotelSpot;
+  spot: HotelSpot;
+  items: string;
+  impression: string;
+  message: string;
+  cost: Cost;
+};
+
+type SectionKey = keyof Pick<FormType, 'hotel' | 'spot' | 'cost'>;
+
 export default function TravelFormBlock() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormType>({
     nickname: '',
     team: '',
     player: '',
@@ -32,21 +69,25 @@ export default function TravelFormBlock() {
     }
   });
 
-  const handleChange = (field: string, value: any) => {
-    if (field.startsWith('cost.')) {
-      const key = field.split('.')[1];
+  const handleChange = (
+    field: keyof FormType,
+    value: string,
+    section?: SectionKey,
+    key?: string
+  ) => {
+    if (section && key) {
       setForm((prev) => ({
         ...prev,
-        cost: { ...prev.cost, [key]: value }
-      }));
-    } else if (field.startsWith('hotel.') || field.startsWith('spot.')) {
-      const [section, key] = field.split('.');
-      setForm((prev) => ({
-        ...prev,
-        [section]: { ...prev[section], [key]: value }
+        [section]: {
+          ...prev[section],
+          [key]: value,
+        },
       }));
     } else {
-      setForm((prev) => ({ ...prev, [field]: value }));
+      setForm((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
     }
   };
 
