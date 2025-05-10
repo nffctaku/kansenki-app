@@ -68,6 +68,7 @@ export default function BuymaStylePostForm() {
       food: 0,
       goods: 0,
       other: 0,
+      [key: string]: number;
     },
     category: '',
   });
