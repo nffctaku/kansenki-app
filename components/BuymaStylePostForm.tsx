@@ -670,5 +670,6 @@ export default function BuymaStylePostForm() {
   </button>
 </div>
 
+
 </div> // ← JSX全体の閉じdiv
 ); 
