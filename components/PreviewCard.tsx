@@ -14,8 +14,8 @@ type Props = {
   spot: string;
   impression: string;
   message: string;
-  profileImage: string | null;
-  bgImage: string | null;
+  profileImage?: string | null;
+  bgImage?: string | null;
 };
 
 export default function PreviewCard({
@@ -39,24 +39,27 @@ export default function PreviewCard({
     <div
       className="w-full h-full rounded-lg shadow-lg p-6 text-white relative"
       style={{
-        backgroundImage: `url(${bgImage})`,
+        backgroundImage: bgImage ? `url(${bgImage})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         minHeight: '600px',
+        backgroundColor: bgImage ? 'transparent' : '#333'
       }}
     >
-      <div className="bg-black p-4 rounded-lg">
+      <div className="bg-black bg-opacity-80 p-4 rounded-lg">
         <div className="flex items-center gap-4 mb-4">
-          {profileImage && (
+          {profileImage ? (
             <img
               src={profileImage}
               alt="プロフィール"
               className="w-16 h-16 rounded-full object-cover border"
             />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gray-500 border" />
           )}
           <div>
-            <h2 className="text-xl font-bold">{nickname}</h2>
-            <p className="text-sm">{month}・{job}</p>
+            <h2 className="text-xl font-bold">{nickname || '名無し'}</h2>
+            <p className="text-sm">{month || '-'}・{job || '-'}</p>
           </div>
         </div>
 

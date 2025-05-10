@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import PreviewCard from '@/components/PreviewCard';
 import html2canvas from 'html2canvas';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { uploadImageToCloudinary } from '@/lib/uploadImage'; // ✅ 修正ポイント！
+import { saveImageUrl } from '@/lib/saveImageUrl';
 
 export default function KansenkiPage() {
   const [nickname, setNickname] = useState('');
@@ -22,6 +22,7 @@ export default function KansenkiPage() {
   const [message, setMessage] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [bgImage, setBgImage] = useState<string | null>(null);
+  const [deleteKey, setDeleteKey] = useState('');
 
   const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -47,23 +48,27 @@ export default function KansenkiPage() {
     try {
       const canvas = await html2canvas(target);
       const dataUrl = canvas.toDataURL('image/png');
-      const fileName = `kansenki_${Date.now()}.png`;
-      const imageRef = ref(storage, `kansenki-images/${fileName}`);
+      const blob = await fetch(dataUrl).then(res => res.blob());
+      const file = new File([blob], 'kansenki.png', { type: 'image/png' });
 
-      await uploadString(imageRef, dataUrl, 'data_url');
-      const downloadURL = await getDownloadURL(imageRef);
+      const imageUrl = await uploadImageToCloudinary(file);
+      if (!imageUrl) {
+        alert('Cloudinaryへのアップロードに失敗しました');
+        return;
+      }
 
-      alert('アップロード完了！URL: ' + downloadURL);
+      await saveImageUrl(imageUrl, deleteKey);
+      alert('CloudinaryとFirestoreへの保存完了！');
     } catch (error) {
-      console.error('アップロード失敗:', error);
-      alert('アップロードに失敗しました');
+      console.error('アップロード処理エラー:', error);
+      alert('アップロード中にエラーが発生しました');
     }
   };
 
   return (
     <div className="flex flex-col md:flex-row gap-4 p-4">
-      {/* 入力フォーム */}
       <div className="w-full md:w-1/2 space-y-2">
+        {/* 各フォーム項目 */}
         <label>ニックネーム<input className="w-full" value={nickname} onChange={(e) => setNickname(e.target.value)} /></label>
         <label>好きなチーム<input className="w-full" value={team} onChange={(e) => setTeam(e.target.value)} /></label>
         <label>好きな選手<input className="w-full" value={player} onChange={(e) => setPlayer(e.target.value)} /></label>
@@ -79,35 +84,36 @@ export default function KansenkiPage() {
         <label>初めて行く人への一言<textarea className="w-full" value={message} onChange={(e) => setMessage(e.target.value)} /></label>
         <label>プロフィール画像<input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setProfileImage)} /></label>
         <label>背景画像<input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setBgImage)} /></label>
+        <label>削除用パスワードまたはメール<input className="w-full" value={deleteKey} onChange={(e) => setDeleteKey(e.target.value)} /></label>
       </div>
 
-      {/* プレビューカード */}
-      <div id="capture-target" className="w-full md:w-1/2">
-        <PreviewCard
-          nickname={nickname}
-          team={team}
-          player={player}
-          month={month}
-          job={job}
-          league={league}
-          firstMatch={firstMatch}
-          travelPeriod={travelPeriod}
-          airline={airline}
-          region={region}
-          spot={spot}
-          impression={impression}
-          message={message}
-          profileImage={profileImage}
-          bgImage={bgImage}
-        />
+      <div className="w-full md:w-1/2">
+        <div id="capture-target">
+          <PreviewCard
+            nickname={nickname}
+            team={team}
+            player={player}
+            month={month}
+            job={job}
+            league={league}
+            firstMatch={firstMatch}
+            travelPeriod={travelPeriod}
+            airline={airline}
+            region={region}
+            spot={spot}
+            impression={impression}
+            message={message}
+            profileImage={profileImage}
+            bgImage={bgImage}
+          />
+        </div>
         <button
           onClick={handleUploadToFirebase}
-          className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Firebaseにアップロード
+          Cloudinaryにアップロード
         </button>
       </div>
     </div>
   );
 }
-

@@ -1,12 +1,15 @@
-// app/posts/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
+// 仮のユーザー（後でGoogleログインと連携予定なら差し替え）
+const user = { email: 'dummy@example.com' };
+
 type Travel = {
   id: string;
+  uid?: string;
   nickname: string;
   month: string;
   match: string;
@@ -24,13 +27,21 @@ export default function PostsPage() {
       const querySnapshot = await getDocs(collection(db, 'kansenki-posts'));
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Travel[];
       setTravels(data);
     };
 
     fetchData();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    const confirmDelete = confirm('この観戦記を削除しますか？');
+    if (!confirmDelete) return;
+
+    alert('※ 削除機能は未実装です。後で実装予定。');
+    // setTravels((prev) => prev.filter((item) => item.id !== id));
+  };
 
   const filteredTravels = travels.filter((t) =>
     [t.team, t.match].join(' ').toLowerCase().includes(searchQuery.toLowerCase())
@@ -53,7 +64,15 @@ export default function PostsPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {filteredTravels.map((travel) => (
-          <div key={travel.id} className="border rounded-xl shadow p-4 bg-white">
+          <div key={travel.id} className="relative border rounded-xl shadow p-4 bg-white">
+            {user?.email && user?.email === travel.uid && (
+              <button
+                onClick={() => handleDelete(travel.id)}
+                className="absolute top-2 right-2 text-xs bg-red-500 text-white px-2 py-1 rounded"
+              >
+                削除
+              </button>
+            )}
             <p className="text-sm text-gray-500">
               {travel.month.replace('-', '年')}月｜{travel.team}
             </p>
