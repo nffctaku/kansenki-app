@@ -1,5 +1,5 @@
 // app/post/page.tsx
-import BuymaStylePostForm from '@/components/BuymaStylePostForm';
+import BuymaStylePostForm from '../components/BuymaStylePostForm';
 
 export default function PostPage() {
   return (
