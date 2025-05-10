@@ -57,7 +57,7 @@ export default function KansenkiPage() {
         return;
       }
 
-      await saveImageUrl(imageUrl, deleteKey);
+      await saveImageUrl(imageUrl);
       alert('CloudinaryとFirestoreへの保存完了！');
     } catch (error) {
       console.error('アップロード処理エラー:', error);
