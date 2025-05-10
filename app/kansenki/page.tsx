@@ -45,6 +45,7 @@ export default function KansenkiPage() {
       return;
     }
 
+
     try {
       const canvas = await html2canvas(target);
       const dataUrl = canvas.toDataURL('image/png');
@@ -118,3 +119,4 @@ export default function KansenkiPage() {
     </div>
   );
 }
+
