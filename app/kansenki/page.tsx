@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import PreviewCard from '@/components/PreviewCard';
 import html2canvas from 'html2canvas';
-import { uploadImageToCloudinary } from '@/lib/uploadImage'; // ✅ 修正ポイント！
+import { uploadImageToCloudinary } from '@/lib/uploadImage';
 import { saveImageUrl } from '@/lib/saveImageUrl';
 
 export default function KansenkiPage() {
@@ -68,7 +68,6 @@ export default function KansenkiPage() {
   return (
     <div className="flex flex-col md:flex-row gap-4 p-4">
       <div className="w-full md:w-1/2 space-y-2">
-        {/* 各フォーム項目 */}
         <label>ニックネーム<input className="w-full" value={nickname} onChange={(e) => setNickname(e.target.value)} /></label>
         <label>好きなチーム<input className="w-full" value={team} onChange={(e) => setTeam(e.target.value)} /></label>
         <label>好きな選手<input className="w-full" value={player} onChange={(e) => setPlayer(e.target.value)} /></label>
@@ -90,21 +89,23 @@ export default function KansenkiPage() {
       <div className="w-full md:w-1/2">
         <div id="capture-target">
           <PreviewCard
-            nickname={nickname}
-            team={team}
-            player={player}
-            month={month}
-            job={job}
-            league={league}
-            firstMatch={firstMatch}
-            travelPeriod={travelPeriod}
-            airline={airline}
-            region={region}
-            spot={spot}
-            impression={impression}
-            message={message}
-            profileImage={profileImage}
-            bgImage={bgImage}
+            {...{
+              nickname,
+              team,
+              player,
+              month,
+              job,
+              league,
+              firstMatch,
+              travelPeriod,
+              airline,
+              region,
+              spot,
+              impression,
+              message,
+              profileImage,
+              bgImage,
+            }}
           />
         </div>
         <button
