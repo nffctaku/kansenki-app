@@ -51,22 +51,31 @@ export default function PostDetailPage() {
   }, [id]);
 
   const handleAddComment = async () => {
-    if (!user || !newComment.trim()) return;
+  if (!user || !newComment.trim() || !id) return;
 
-    await addDoc(collection(db, 'kansenki-posts', id.toString(), 'comments'), {
-      text: newComment,
-      userId: user.uid,
-      nickname: user.displayName || '匿名',
-      createdAt: serverTimestamp(),
-    });
+  await addDoc(collection(db, 'kansenki-posts', id.toString(), 'comments'), {
+    text: newComment,
+    userId: user.uid,
+    nickname: user.displayName || '匿名',
+    createdAt: serverTimestamp(),
+  });
 
-    setNewComment('');
-  };
+  setNewComment('');
+};
 
   // ✅ 投稿がまだ読み込まれてなければ
   if (!post) {
     return <div className="p-4">読み込み中...</div>;
   }
+
+const CATEGORY_LABELS: Record<string, string> = {
+  england: 'イングランド',
+  spain: 'スペイン',
+  italy: 'イタリア',
+  germany: 'ドイツ',
+  france: 'フランス',
+  other: 'その他'
+};
 
 return (
   <div className="p-4 max-w-4xl mx-auto space-y-4">
@@ -78,16 +87,7 @@ return (
         href={`/gallery/${post.category}`}
         className="underline"
       >
-        {
-          {
-            england: 'イングランド',
-            spain: 'スペイン',
-            italy: 'イタリア',
-            germany: 'ドイツ',
-            france: 'フランス',
-            other: 'その他'
-          }[post.category] || 'カテゴリー未設定'
-        }
+        {CATEGORY_LABELS[post.category] || 'カテゴリー未設定'}
       </a>
     </div>
 
