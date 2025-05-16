@@ -1,4 +1,5 @@
-// app/post/page.tsx
+'use client';
+
 import BuymaStylePostForm from '@/components/BuymaStylePostForm';
 
 export default function PostPage() {

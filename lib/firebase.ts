@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyC9TDHC4S30fLHG04wJ36cWRgKqfP9F-WY",
   authDomain: "kansenki-app.firebaseapp.com",
   projectId: "kansenki-app",
-  storageBucket: "kansenki-app.appspot.com",
+  storageBucket: 'kansenki-app.firebasestorage.app',
   messagingSenderId: "334844980781",
   appId: "1:334844980781:web:a8344a50bd1694d8b5aea4"
 };
