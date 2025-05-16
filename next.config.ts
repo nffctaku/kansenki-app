@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    css: {
+      optimizeCss: false, // lightningcss を無効化（Vercel対策）
+    },
+  },
 };
 
 export default nextConfig;
