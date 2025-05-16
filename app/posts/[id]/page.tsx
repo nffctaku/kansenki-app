@@ -2,38 +2,95 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import {
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  serverTimestamp,
+  onSnapshot,
+  query,
+  orderBy
+} from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import ImageSlider from '@/components/ImageSlider';
-
 
 export default function PostDetailPage() {
   const { id } = useParams();
   const [post, setPost] = useState<any>(null);
+  const [user] = useAuthState(auth);
+  const [newComment, setNewComment] = useState('');
+  const [comments, setComments] = useState<any[]>([]);
 
   useEffect(() => {
+    if (!id) return;
+
     const fetchPost = async () => {
-      if (!id) return;
       const ref = doc(db, 'kansenki-posts', id.toString());
+      console.log('[debug] 取得しようとしているID:', id);
       const snapshot = await getDoc(ref);
       if (snapshot.exists()) {
-        const data = snapshot.data();
-        console.log('取得データ：', data);
-        console.log('画像の数:', data.imageUrls?.length);
-        console.log('画像の中身:', data.imageUrls);
-        setPost(data);
+        console.log('[debug] 投稿取得成功！');
+        setPost(snapshot.data());
       } else {
-        console.log('投稿が見つかりません');
+        console.log('[debug] 投稿が見つかりません');
       }
     };
 
     fetchPost();
+
+    const commentsRef = collection(db, 'kansenki-posts', id.toString(), 'comments');
+    const q = query(commentsRef, orderBy('createdAt', 'asc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setComments(data);
+    });
+
+    return () => unsubscribe();
   }, [id]);
 
-  if (!post) return <div className="p-4">読み込み中...</div>;
+  const handleAddComment = async () => {
+    if (!user || !newComment.trim()) return;
 
- return (
+    await addDoc(collection(db, 'kansenki-posts', id.toString(), 'comments'), {
+      text: newComment,
+      userId: user.uid,
+      nickname: user.displayName || '匿名',
+      createdAt: serverTimestamp(),
+    });
+
+    setNewComment('');
+  };
+
+  // ✅ 投稿がまだ読み込まれてなければ
+  if (!post) {
+    return <div className="p-4">読み込み中...</div>;
+  }
+
+return (
   <div className="p-4 max-w-4xl mx-auto space-y-4">
+    {/* パンくずリンク：トップページ ＞ カテゴリー */}
+    <div className="text-sm text-blue-600 mb-2 space-x-1">
+      <a href="/" className="underline">トップページ</a>
+      <span>&gt;</span>
+      <a
+        href={`/gallery/${post.category}`}
+        className="underline"
+      >
+        {
+          {
+            england: 'イングランド',
+            spain: 'スペイン',
+            italy: 'イタリア',
+            germany: 'ドイツ',
+            france: 'フランス',
+            other: 'その他'
+          }[post.category] || 'カテゴリー未設定'
+        }
+      </a>
+    </div>
+
     <h1 className="text-xl font-bold">
       {post.matches?.[0]?.teamA} vs {post.matches?.[0]?.teamB}
     </h1>
@@ -47,6 +104,7 @@ export default function PostDetailPage() {
         <ImageSlider images={post.imageUrls} />
       </div>
     )}
+
 
       <div className="space-y-2 text-sm">
         <p><strong>観戦シーズン：</strong>{post.season || '未入力'}</p>
@@ -116,7 +174,42 @@ export default function PostDetailPage() {
           </ul>
         </div>
 
-        <p><strong>コメント受付：</strong>{post.allowComment ? '受け付ける' : '受け付けない'}</p>
+         <p><strong>コメント受付：</strong>{post.allowComment ? '受け付ける' : '受け付けない'}</p>
+
+        {post.allowComment && (
+          <div className="mt-10 border-t pt-6">
+            <h2 className="text-lg font-bold mb-2">コメント</h2>
+
+            {user ? (
+              <div className="mb-4">
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="w-full border rounded p-2"
+                  rows={3}
+                  placeholder="コメントを書く..."
+                />
+                <button
+                  onClick={handleAddComment}
+                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  投稿する
+                </button>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-600">コメントするにはログインしてください。</p>
+            )}
+
+            <div className="space-y-4">
+              {comments.map((comment) => (
+                <div key={comment.id} className="border-b pb-2">
+                  <p className="font-semibold">{comment.nickname}</p>
+                  <p>{comment.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

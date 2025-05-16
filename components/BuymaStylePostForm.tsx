@@ -5,6 +5,7 @@ import Select from 'react-select';
 import { addDoc, collection } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
+import { useRouter } from 'next/navigation'; 
 
 // 🔼 Firebase Storage に画像をアップロードする関数
 const uploadImageToFirebase = async (file: File): Promise<string> => {
@@ -29,7 +30,7 @@ const teamList = [
   'マンチェスター・シティ', 'アーセナル', 'リバプール', 'アストン・ビラ', 'トッテナム',
   'チェルシー', 'ニューカッスル', 'マンチェスター・ユナイテッド', 'ウエスト・ハム',
   'クリスタル・パレス', 'ブライトン', 'ボーンマス', 'フルハム', 'ウォルバーハンプトン',
-  'エバートン', 'ブレントフォード', 'ノッティンガム・フォレスト', 'レスター・シティ',
+  'エバートン', 'ブレントフォード', 'ノッティンガム・フォレスト', 'サウサンプトン','レスター・シティ',
   'レアル・マドリー', 'バルセロナ', 'アトレティコ・マドリー', 'ソシエダ', 'ビジャレアル',
   'バイエルン', 'ドルトムント', 'ライプツィヒ', 'フランクフルト',
   'ユベントス', 'インテル', 'ミラン', 'ローマ', 'ナポリ', 'アタランタ',
@@ -50,6 +51,8 @@ type Cost = {
 };
 
 export default function BuymaStylePostForm() {
+  const router = useRouter();
+
   const [form, setForm] = useState<{
     nickname: string;
     season: string;
@@ -151,24 +154,24 @@ export default function BuymaStylePostForm() {
       })
     );
 
-    // 4. データ送信
     const dataToSend = {
-      ...formWithoutImages,
-      matches: cleanedMatches,
-      imageUrls: uploadedUrls,
-      createdAt: new Date(),
-    };
+        ...formWithoutImages,
+        matches: cleanedMatches,
+        imageUrls: uploadedUrls,
+        createdAt: new Date(),
+      };
 
-    console.log("送信データ:", dataToSend);
+      console.log("送信データ:", dataToSend);
 
-    await addDoc(collection(db, 'kansenki-posts'), dataToSend);
-    alert('投稿が完了しました！');
- } catch (err: any) {
-  console.error('投稿エラー詳細:', err);
-  alert('投稿に失敗しました');
-  }
-};
+      const docRef = await addDoc(collection(db, 'kansenki-posts'), dataToSend);
 
+     console.log("✅ push直前まで来た");
+    router.push(`/posts/${docRef.id}`); // ← 成功した投稿の詳細ページに遷移
+    } catch (err: any) {
+      console.error('投稿エラー詳細:', err);
+      alert('投稿に失敗しました');
+    }
+  };
 
   return (
   <div className="p-4 space-y-4">
