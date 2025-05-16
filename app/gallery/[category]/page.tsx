@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { collection, getDocs, query, where } from 'firebase/firestore'; // ←重複してたimportも統合
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Link from 'next/link';
 
@@ -15,18 +15,32 @@ const categoryMap: { [key: string]: string } = {
   other: 'その他',
 };
 
-type Travel = {
-    id: string;
-    matches?: { teamA: string; teamB: string; competition: string }[];
-    images?: string[];
-    imageUrl?: string;
-    category?: string;
-    season?: string;
-    stayDuration?: string;
-    cost?: { total?: number };
-    createdAt?: { seconds: number };
-    firstAdvice?: string;
+// ✅ 型定義
+type Match = {
+  teamA: string;
+  teamB: string;
+  competition: string;
+  season?: string;
 };
+
+type Cost = {
+  total?: number;
+};
+
+type Travel = {
+  id: string;
+  matches?: Match[];
+  images?: string[];
+  imageUrl?: string;
+  category?: string;
+  season?: string;
+  stayDuration?: string;
+  duration?: string; // ← 追加！
+  cost?: Cost;
+  createdAt?: { seconds: number };
+  firstAdvice?: string;
+};
+
 
 export default function CategoryPage() {
   const { category } = useParams();

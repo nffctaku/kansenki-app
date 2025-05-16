@@ -4,18 +4,17 @@ import { useState } from 'react';
 import Select from 'react-select';
 import { addDoc, collection } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase'; // Firestore + Storage 両方インポート
+import { db, storage } from '@/lib/firebase';
 
 // 🔼 Firebase Storage に画像をアップロードする関数
 const uploadImageToFirebase = async (file: File): Promise<string> => {
-  const safeName = file.name.replace(/[^\w.-]/g, '_'); // ← 特殊文字除去
+  const safeName = file.name.replace(/[^\w.-]/g, '_');
   const filename = `images/${Date.now()}_${safeName}`;
   const fileRef = ref(storage, filename);
-  console.log('[uploading]', file); // ← ログで確認
+  console.log('[uploading]', file);
   await uploadBytes(fileRef, file);
   return await getDownloadURL(fileRef);
 };
-
 
 // 🔽 観戦シーズン：1960/61〜2025/26
 const seasons = Array.from({ length: 2025 - 1960 + 1 }, (_, i) => {
@@ -25,7 +24,6 @@ const seasons = Array.from({ length: 2025 - 1960 + 1 }, (_, i) => {
     label: `${year}/${(year + 1).toString().slice(-2)}`
   };
 }).reverse();
-
 
 const teamList = [
   'マンチェスター・シティ', 'アーセナル', 'リバプール', 'アストン・ビラ', 'トッテナム',
@@ -38,8 +36,57 @@ const teamList = [
   'パリSG', 'マルセイユ', 'モナコ', 'リヨン'
 ].map((team) => ({ value: team, label: team }));
 
+// ✅ 型定義追加
+type Cost = {
+  total: number;
+  flight: number;
+  hotel: number;
+  ticket: number;
+  transport: number;
+  food: number;
+  goods: number;
+  other: number;
+  [key: string]: number; // ← これで key アクセスOK
+};
+
 export default function BuymaStylePostForm() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    nickname: string;
+    season: string;
+    matches: {
+      teamA: string;
+      teamB: string;
+      competition: string;
+      season: string;
+      nickname: string;
+    }[];
+    duration: string;
+    watchYear: string;
+    watchMonth: string;
+    lifestyle: string;
+    stayDuration: string;
+    airlines: { name: string; seat: string }[];
+    goTime: string;
+    goType: string;
+    goVia: string;
+    returnTime: string;
+    returnType: string;
+    returnVia: string;
+    hotels: { url: string; comment: string; rating: number }[];
+    spots: { url: string; comment: string; rating: number; autoName: string; address: string }[];
+    items: string;
+    goods: string;
+    episode: string;
+    firstReflection: string;
+    firstAdvice: string;
+    images: File[];
+    allowComment: boolean;
+    snsX: string;
+    snsInstagram: string;
+    snsNote: string;
+    category: string;
+    cost: Cost;
+  }>({
     nickname: '',
     season: '',
     matches: [
@@ -51,27 +98,20 @@ export default function BuymaStylePostForm() {
     lifestyle: '',
     stayDuration: '',
     airlines: [{ name: '', seat: '' }],
-
-    // ✈️ 行き・帰りの移動情報
     goTime: '',
     goType: '',
     goVia: '',
     returnTime: '',
     returnType: '',
     returnVia: '',
-
-    hotels: [
-      { url: '', comment: '', rating: 0 }
-    ],
-    spots: [
-      { url: '', comment: '', rating: 0, autoName: '', address: '' }
-    ],
+    hotels: [{ url: '', comment: '', rating: 0 }],
+    spots: [{ url: '', comment: '', rating: 0, autoName: '', address: '' }],
     items: '',
     goods: '',
     episode: '',
     firstReflection: '',
     firstAdvice: '',
-    images: [] as File[],
+    images: [],
     allowComment: true,
     snsX: '',
     snsInstagram: '',
@@ -85,11 +125,9 @@ export default function BuymaStylePostForm() {
       transport: 0,
       food: 0,
       goods: 0,
-      other: 0,
-      
+      other: 0
     }
   });
-
 
   const handleSubmit = async () => {
   try {
@@ -233,7 +271,17 @@ export default function BuymaStylePostForm() {
         onClick={() =>
           setForm({
             ...form,
-            matches: [...form.matches, { teamA: '', teamB: '', competition: '' }],
+           matches: [
+  ...form.matches,
+  {
+    teamA: '',
+    teamB: '',
+    competition: '',
+    season: '',
+    nickname: ''
+  }
+],
+
           })
         }
         className="text-blue-600 font-medium hover:underline"
