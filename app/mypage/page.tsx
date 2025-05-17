@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import LogoutButton from '@/components/LogoutButton';
+
 
 export default function Mypage() {
   const [user, setUser] = useState<any>(null);
@@ -28,6 +30,7 @@ export default function Mypage() {
       <h1 className="text-2xl font-bold mb-4">マイページ</h1>
       <p>👤 ユーザー名: {user.displayName}</p>
       <p>📧 メール: {user.email}</p>
+        <LogoutButton /> {/* 🔻ここで使うだけ！ */}
       <img
         src={user.photoURL}
         alt="プロフィール画像"

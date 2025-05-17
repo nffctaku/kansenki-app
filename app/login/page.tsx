@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, provider } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -11,8 +10,8 @@ export default function LoginPage() {
   const handleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      console.log('ログイン成功:', result.user);
-      router.push('/mypage'); // ログイン後の遷移先
+      console.log('ログイン成功:', result.user); // ✅ これが出るか確認
+      router.push('/mypage'); // ✅ これで遷移する
     } catch (error) {
       console.error('ログイン失敗:', error);
     }
@@ -30,3 +29,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
