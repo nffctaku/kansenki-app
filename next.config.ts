@@ -1,7 +1,5 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
-  // 不要な experimental オプションは削除する
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   experimental: {
     disableOptimizedLoading: true,
   },
