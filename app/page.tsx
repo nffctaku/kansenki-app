@@ -3,10 +3,20 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { collection, getDocs } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { collection, getDocs } from 'firebase/firestore';
+import {
+  auth,
+  db,
+  provider, // ✅ firebase.ts で export している GoogleAuthProvider を使う
+} from '@/lib/firebase';
+import {
+  onAuthStateChanged,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+} from 'firebase/auth';
+
 
 type Travel = {
   id: string;
@@ -28,44 +38,61 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      const snapshot = await getDocs(collection(db, 'kansenki-posts'));
-      const data = snapshot.docs.map((doc) => {
-        const d = doc.data();
-        return {
-          id: doc.id,
-          nickname: d.nickname || '',
-          imageUrls: d.imageUrls || [],
-          category: d.category || '',
-          matches: d.matches || [],
-        };
-      });
-      setPosts(data.reverse());
-    };
-    fetchPosts();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user);
+  const fetchPosts = async () => {
+    const snapshot = await getDocs(collection(db, 'kansenki-posts'));
+    const data = snapshot.docs.map((doc) => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        nickname: d.nickname || '',
+        imageUrls: d.imageUrls || [],
+        category: d.category || '',
+        matches: d.matches || [],
+      };
     });
-    return () => unsubscribe();
-  }, []);
-
-  const handlePostClick = () => {
-    if (isLoggedIn) {
-      router.push('/form');
-    } else {
-      router.push('/login');
-    }
+    setPosts(data.reverse());
   };
 
-  const groupedByCategory = posts.reduce((acc, post) => {
-    const category = post.category || 'other';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(post);
-    return acc;
-  }, {} as Record<string, Travel[]>);
+  fetchPosts();
+
+  // スマホでログイン後のリダイレクト処理
+  getRedirectResult(auth).then((result) => {
+    if (result?.user) {
+      setIsLoggedIn(true);
+      console.log('スマホログイン完了:', result.user);
+    }
+  });
+}, []);
+
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    setIsLoggedIn(!!user);
+  });
+  return () => unsubscribe();
+}, []);
+
+const handlePostClick = async () => {
+  const isMobile =
+    typeof window !== 'undefined' && /iPhone|Android/.test(navigator.userAgent);
+
+  if (isLoggedIn) {
+    router.push('/form');
+  } else {
+    if (isMobile) {
+      await signInWithRedirect(auth, provider); // スマホ：リダイレクト方式
+    } else {
+      await signInWithPopup(auth, provider); // PC：ポップアップ方式
+    }
+  }
+};
+
+const groupedByCategory = posts.reduce((acc, post) => {
+  const category = post.category || 'other';
+  if (!acc[category]) acc[category] = [];
+  acc[category].push(post);
+  return acc;
+}, {} as Record<string, Travel[]>);
+
 
   return (
   <div className="bg-white min-h-screen">
