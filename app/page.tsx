@@ -95,7 +95,8 @@ export default function HomePage() {
       {Object.entries(groupedByCategory).map(([category, posts]) => (
         <div key={category} className="mb-8">
           {/* カテゴリー名を表示したくないならこの行を消してOK */}
-          {/* <h2 className="text-lg font-bold mb-2">{category}</h2> */}
+       <h2 className="text-base font-bold mt-6 mb-2 px-1 text-gray-800">{category}</h2>
+
 
           <div className="grid grid-cols-2 gap-3">
             {posts.map((post) => (
