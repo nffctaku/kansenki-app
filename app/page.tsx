@@ -71,20 +71,14 @@ useEffect(() => {
   return () => unsubscribe();
 }, []);
 
-const handlePostClick = async () => {
-  const isMobile =
-    typeof window !== 'undefined' && /iPhone|Android/.test(navigator.userAgent);
-
+const handlePostClick = () => {
   if (isLoggedIn) {
-    router.push('/form');
+    router.push('/form'); // ✅ ログイン済み → 投稿フォームへ
   } else {
-    if (isMobile) {
-      await signInWithRedirect(auth, provider); // スマホ：リダイレクト方式
-    } else {
-      await signInWithPopup(auth, provider); // PC：ポップアップ方式
-    }
+    router.push('/login'); // ✅ 未ログイン → ログインページへ
   }
 };
+
 
 const groupedByCategory = posts.reduce((acc, post) => {
   const category = post.category || 'other';
