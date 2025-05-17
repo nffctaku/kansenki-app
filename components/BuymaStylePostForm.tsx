@@ -133,8 +133,10 @@ export default function BuymaStylePostForm() {
   });
 
   const handleSubmit = async () => {
+    console.log("✅ handleSubmit 実行開始！");
+
   try {
-    // 1. matches 整形
+    // matches 整形
     const cleanedMatches = form.matches.map((match) => ({
       teamA: match.teamA,
       teamB: match.teamB,
@@ -143,35 +145,59 @@ export default function BuymaStylePostForm() {
       nickname: form.nickname,
     }));
 
-    // 2. images を除外（Firestoreに File は送れない）
+    // images を除外
     const { images, ...formWithoutImages } = form;
 
-    // 3. Firebase Storage に画像アップロード
+    // 画像アップロード
     const uploadedUrls = await Promise.all(
       images.map(async (file) => {
-        const url = await uploadImageToFirebase(file); // この関数を別で用意
+        const url = await uploadImageToFirebase(file);
         return url;
       })
     );
 
+    // 🔧 カンマ除去して cost をクリーンな形で再構築
+    const cleanNumber = (value: any) =>
+      Number(String(value).replace(/,/g, '') || 0);
+
+    const cleanedCost = {
+      flight: cleanNumber(form.cost.flight),
+      hotel: cleanNumber(form.cost.hotel),
+      ticket: cleanNumber(form.cost.ticket),
+      transport: cleanNumber(form.cost.transport),
+      food: cleanNumber(form.cost.food),
+      goods: cleanNumber(form.cost.goods),
+      other: cleanNumber(form.cost.other),
+    };
+
+    const totalCost = Object.values(cleanedCost).reduce((sum, val) => sum + val, 0);
+
     const dataToSend = {
-        ...formWithoutImages,
-        matches: cleanedMatches,
-        imageUrls: uploadedUrls,
-        createdAt: new Date(),
-      };
+      ...formWithoutImages,
+      matches: cleanedMatches,
+      cost: {
+        ...cleanedCost,
+        total: totalCost,
+      },
+      imageUrls: uploadedUrls,
+      createdAt: new Date(),
+    };
 
-      console.log("送信データ:", dataToSend);
+    console.log("✅ handleSubmit 実行開始");
+    console.log("cleanedCostの中身:", cleanedCost);
+    console.log("計算された total:", totalCost);
+    console.log("送信データ:", dataToSend);
+    console.log("costの中身:", dataToSend.cost);
 
-      const docRef = await addDoc(collection(db, 'kansenki-posts'), dataToSend);
 
-     console.log("✅ push直前まで来た");
-    router.push(`/posts/${docRef.id}`); // ← 成功した投稿の詳細ページに遷移
-    } catch (err: any) {
-      console.error('投稿エラー詳細:', err);
-      alert('投稿に失敗しました');
-    }
-  };
+    const docRef = await addDoc(collection(db, 'kansenki-posts'), dataToSend);
+    router.push(`/posts/${docRef.id}`);
+  } catch (err) {
+    console.error('投稿エラー詳細:', err);
+    alert('投稿に失敗しました');
+  }
+};
+
 
   return (
   <div className="p-4 space-y-4">

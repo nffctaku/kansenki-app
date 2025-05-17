@@ -105,60 +105,92 @@ return (
       </div>
     )}
 
+    <div className="space-y-2 text-sm">
+      <p><strong>観戦シーズン：</strong>{post.season || '未入力'}</p>
+      <p><strong>大会名：</strong>{post.matches?.[0]?.competition || '未入力'}</p>
+      <p><strong>対戦カード：</strong>{post.matches?.[0]?.teamA} vs {post.matches?.[0]?.teamB}</p>
+      <p><strong>ニックネーム：</strong>{post.nickname || '未入力'}</p>
+      <p><strong>当時のライフスタイル：</strong>{post.lifestyle || post.role || '未入力'}</p>
+      <p><strong>観戦時期：</strong>{post.watchYear}年 {post.watchMonth}月</p>
+      <p><strong>滞在期間：</strong>{post.stayDuration || post.duration || '未入力'}</p>
 
-      <div className="space-y-2 text-sm">
-        <p><strong>観戦シーズン：</strong>{post.season || '未入力'}</p>
-        <p><strong>大会名：</strong>{post.competition || '未入力'}</p>
-        <p><strong>対戦カード：</strong>{post.matches?.[0]?.teamA} vs {post.matches?.[0]?.teamB}</p>
-        <p><strong>ニックネーム：</strong>{post.nickname || '未入力'}</p>
-        <p><strong>当時のライフスタイル：</strong>{post.role || '未入力'}</p>
-        <p><strong>観戦時期：</strong>{post.watchYear}年 {post.watchMonth}月</p>
-        <p><strong>滞在期間：</strong>{post.stayDuration || post.duration || '未入力'}</p>
-
-        <div>
-          <strong>利用航空会社：</strong>
+      {/* ✅ 利用航空会社 */}
+      <div>
+        <strong>利用航空会社：</strong>
+        {Array.isArray(post.airlines) && post.airlines.length > 0 ? (
           <ul className="list-disc list-inside">
-            {post.airlines?.map((air: any, idx: number) => (
+            {post.airlines.map((air: any, idx: number) => (
               <li key={idx}>{air.name}（{air.seat}）</li>
-            )) || '未入力'}
+            ))}
           </ul>
-        </div>
+        ) : (
+          <p>未入力</p>
+        )}
+      </div>
 
-        <div>
-          <strong>宿泊先：</strong>
+      {/* ✅ 目的地までの移動情報（新規追加） */}
+      <div>
+        <strong>目的地までの移動情報：</strong>
+        <ul className="list-disc list-inside">
+          <li>行き：{post.goTime || '未入力'}、{post.goType || '直行便'}（経由地：{post.goVia || 'なし'}）</li>
+          <li>帰り：{post.returnTime || '未入力'}、{post.returnType || '直行便'}（経由地：{post.returnVia || 'なし'}）</li>
+        </ul>
+      </div>
+
+      {/* ✅ 宿泊先 */}
+      <div>
+        <strong>宿泊先：</strong>
+        {Array.isArray(post.hotels) && post.hotels.length > 0 ? (
           <ul className="list-disc list-inside">
-            {post.hotels?.map((hotel: any, idx: number) => (
+            {post.hotels.map((hotel: any, idx: number) => (
               <li key={idx}>
-                <a href={hotel.url} target="_blank" className="text-blue-600 underline">{hotel.url}</a>（★{hotel.rating}） - {hotel.comment}
+                <a href={hotel.url} target="_blank" className="text-blue-600 underline">{hotel.url}</a>
+                （★{hotel.rating}） - {hotel.comment}
               </li>
-            )) || '未入力'}
+            ))}
           </ul>
-        </div>
+        ) : (
+          <p>未入力</p>
+        )}
+      </div>
 
-        <div>
-          <strong>おすすめスポット：</strong>
+      {/* ✅ おすすめスポット */}
+      <div>
+        <strong>おすすめスポット：</strong>
+        {Array.isArray(post.spots) && post.spots.length > 0 ? (
           <ul className="list-disc list-inside">
-            {post.spots?.map((spot: any, idx: number) => (
+            {post.spots.map((spot: any, idx: number) => (
               <li key={idx}>
-                <a href={spot.url} target="_blank" className="text-blue-600 underline">{spot.url}</a>（★{spot.rating}） - {spot.comment}
+                <a href={spot.url} target="_blank" className="text-blue-600 underline">{spot.url}</a>
+                （★{spot.rating}） - {spot.comment}
               </li>
-            )) || '未入力'}
+            ))}
           </ul>
-        </div>
+        ) : (
+          <p>未入力</p>
+        )}
+      </div>
 
-        <div>
-          <strong>費用内訳：</strong>
-          <ul className="list-disc list-inside">
-            <li>航空券：{post.cost?.flight}円</li>
-            <li>宿泊費：{post.cost?.hotel}円</li>
-            <li>チケット代：{post.cost?.ticket}円</li>
-            <li>交通費：{post.cost?.transport}円</li>
-            <li>食費：{post.cost?.food}円</li>
-            <li>グッズ：{post.cost?.goods}円</li>
-            <li>その他：{post.cost?.other}円</li>
-          </ul>
-          <p>合計費用：約{post.cost?.total ? `${post.cost.total}万円` : '未入力'}</p>
-        </div>
+       <div>
+  <strong>費用内訳：</strong>
+  <ul className="list-disc list-inside">
+    <li>航空券：{post.cost?.flight !== undefined ? `${Number(post.cost.flight).toLocaleString()} 円` : '未入力'}</li>
+    <li>宿泊費：{post.cost?.hotel !== undefined ? `${Number(post.cost.hotel).toLocaleString()} 円` : '未入力'}</li>
+    <li>チケット代：{post.cost?.ticket !== undefined ? `${Number(post.cost.ticket).toLocaleString()} 円` : '未入力'}</li>
+    <li>交通費：{post.cost?.transport !== undefined ? `${Number(post.cost.transport).toLocaleString()} 円` : '未入力'}</li>
+    <li>食費：{post.cost?.food !== undefined ? `${Number(post.cost.food).toLocaleString()} 円` : '未入力'}</li>
+    <li>グッズ：{post.cost?.goods !== undefined ? `${Number(post.cost.goods).toLocaleString()} 円` : '未入力'}</li>
+    <li>その他：{post.cost?.other !== undefined ? `${Number(post.cost.other).toLocaleString()} 円` : '未入力'}</li>
+  </ul>
+  <p className="mt-2 font-semibold text-base">
+  合計費用：約{" "}
+  {post.cost?.total !== undefined
+    ? `${Math.round(Number(post.cost.total) / 10000)}万円`
+    : '未入力'}
+</p>
+
+</div>
+
 
         <p><strong>持参アイテム：</strong>{post.items || '未入力'}</p>
         <p><strong>買ったグッズ：</strong>{post.goods || '未入力'}</p>

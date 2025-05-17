@@ -44,18 +44,23 @@ export default function HomePage() {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* ヘッダー */}
-      <header className="border-b shadow-sm py-4 px-6 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <h1 className="text-2xl font-bold">初現地観戦記</h1>
-        </div>
-        <div className="flex space-x-4">
-          <Link href="/login" className="text-sm text-gray-700 hover:underline">ログイン</Link>
-          <Link href="/form" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
-            投稿する
-          </Link>
-        </div>
-      </header>
+    {/* ヘッダー */}
+    <header className="border-b shadow-sm py-4 px-6 flex justify-between items-center">
+      <div className="flex items-center space-x-3">
+        <h1 className="text-2xl font-bold">初現地観戦記</h1>
+      </div>
+      <div className="flex items-center space-x-4">
+        <Link href="/login" className="text-sm text-gray-700 hover:underline flex items-center h-full">
+          ログイン
+        </Link>
+        <Link
+          href="/form"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm flex items-center"
+        >
+          投稿する
+        </Link>
+      </div>
+    </header>
 
       {/* カテゴリーリンク */}
       <nav className="border-b text-sm text-center py-2 space-x-4">
