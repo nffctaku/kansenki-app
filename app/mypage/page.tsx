@@ -3,38 +3,37 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import LogoutButton from '@/components/LogoutButton';
+import { useRouter } from 'next/navigation';
 
-
-export default function Mypage() {
+export default function MyPage() {
   const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      if (u) {
+        setUser(u);
+      } else {
+        router.push('/login');
+      }
     });
 
-    return () => unsubscribe(); // クリーンアップ
-  }, []);
-
-  if (loading) return <div className="p-4">読み込み中...</div>;
+    return () => unsubscribe();
+  }, [router]);
 
   if (!user) {
-    return <div className="p-4 text-red-500">ログインしていません。</div>;
+    return <div className="p-6 text-center">読み込み中...</div>;
   }
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
+    <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">マイページ</h1>
-      <p>👤 ユーザー名: {user.displayName}</p>
-      <p>📧 メール: {user.email}</p>
-        <LogoutButton /> {/* 🔻ここで使うだけ！ */}
+      <p>ユーザー名：{user.displayName}</p>
+      <p>メール：{user.email}</p>
       <img
-        src={user.photoURL}
+        src={user.photoURL || ''}
         alt="プロフィール画像"
-        className="mt-4 w-20 h-20 rounded-full"
+        className="w-24 h-24 rounded-full mt-4"
       />
     </div>
   );
