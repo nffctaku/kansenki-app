@@ -91,41 +91,44 @@ export default function HomePage() {
     </div>
 
     {/* カテゴリ別投稿一覧 */}
-    <div className="px-4 mt-6">
-      {Object.entries(groupedByCategory).map(([category, posts]) => (
-        <div key={category} className="mb-8">
-          {/* カテゴリー名を表示したくないならこの行を消してOK */}
-       <h2 className="text-base font-bold mt-6 mb-2 px-1 text-gray-800">{category}</h2>
+    {/* カテゴリ別投稿一覧 */}
+{/* カテゴリ別投稿一覧 */}
+<div className="w-screen px-4 mt-6">
+  {Object.entries(groupedByCategory).map(([category, posts]) => (
+    <div key={category} className="mb-8">
+      <h2 className="text-base font-bold mt-6 mb-2 px-1 text-gray-800">{category}</h2>
 
-
-          <div className="grid grid-cols-2 gap-3">
-            {posts.map((post) => (
-              <Link href={`/posts/${post.id}`} key={post.id} className="block">
-                <div className="relative aspect-square rounded overflow-hidden shadow-sm bg-gray-100">
-                  {post.imageUrls?.[0] ? (
-                    <img
-                      src={post.imageUrls[0]}
-                      alt="投稿画像"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      No Image
-                    </div>
-                  )}
-                  <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white px-2 py-1">
-                    <p className="text-xs truncate opacity-80">#{post.category}</p>
-                    <p className="text-sm font-semibold truncate">
-                      {post.matches?.[0]?.teamA} vs {post.matches?.[0]?.teamB}
-                    </p>
+      <div className="overflow-x-visible">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 w-full">
+          {posts.slice(0, 6).map((post) => (
+            <Link href={`/posts/${post.id}`} key={post.id} className="block">
+              <div className="relative aspect-square rounded overflow-hidden shadow-sm bg-gray-100">
+                {post.imageUrls?.[0] ? (
+                  <img
+                    src={post.imageUrls[0]}
+                    alt="投稿画像"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    No Image
                   </div>
+                )}
+                <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white px-2 py-1">
+                  <p className="text-xs truncate opacity-80">#{post.category}</p>
+                  <p className="text-sm font-semibold truncate">
+                    {post.matches?.[0]?.teamA} vs {post.matches?.[0]?.teamB}
+                  </p>
                 </div>
-              </Link>
-            ))}
-          </div>
+              </div>
+            </Link>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
+  ))}
+</div>
+
 
     {/* フッター */}
     <footer className="mt-12 py-8 text-center space-y-4 text-sm text-gray-600">
