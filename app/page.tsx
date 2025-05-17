@@ -52,6 +52,10 @@ export default function HomePage() {
 
   return (
   <div className="bg-white min-h-screen">
+    <div className="text-red-500 md:text-green-500 p-4">
+  Tailwind テストテキスト
+</div>
+
     {/* ヘッダー */}
     <header className="border-b shadow-sm py-4 px-6 flex justify-between items-center">
       <div className="flex items-center space-x-3">
@@ -70,16 +74,6 @@ export default function HomePage() {
       </div>
     </header>
 
-    {/* カテゴリーリンク */}
-    <nav className="border-b text-sm text-center py-2 space-x-4">
-      <Link href="/gallery/italy" className="hover:underline">イタリア</Link>
-      <Link href="/gallery/england" className="hover:underline">イングランド</Link>
-      <Link href="/gallery/spain" className="hover:underline">スペイン</Link>
-      <Link href="/gallery/germany" className="hover:underline">ドイツ</Link>
-      <Link href="/gallery/france" className="hover:underline">フランス</Link>
-      <Link href="/gallery/other" className="hover:underline">その他</Link>
-    </nav>
-
     {/* 検索バー */}
     <div className="border-b py-4 px-6 bg-gray-50 flex gap-2">
       <input
@@ -90,35 +84,46 @@ export default function HomePage() {
       <button className="bg-gray-800 text-white px-4 py-2 rounded">検索</button>
     </div>
 
-    {/* カテゴリ別投稿一覧 */}
-    {/* カテゴリ別投稿一覧 */}
 {/* カテゴリ別投稿一覧 */}
 <div className="w-screen px-4 mt-6">
-  {Object.entries(groupedByCategory).map(([category, posts]) => (
-    <div key={category} className="mb-8">
-      <h2 className="text-base font-bold mt-6 mb-2 px-1 text-gray-800">{category}</h2>
+  {Object.entries(groupedByCategory).map(([category, posts]) => {
+    // ✅ 英語カテゴリ名を日本語に変換
+    const categoryLabelMap: Record<string, string> = {
+      england: 'イングランド',
+      italy: 'イタリア',
+      spain: 'スペイン',
+      germany: 'ドイツ',
+      france: 'フランス',
+      other: 'その他',
+    };
 
-      <div className="overflow-x-visible">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 w-full">
-          {posts.slice(0, 6).map((post) => (
-            <Link href={`/posts/${post.id}`} key={post.id} className="block">
-              <div className="relative aspect-square rounded overflow-hidden shadow-sm bg-gray-100">
-                {post.imageUrls?.[0] ? (
-                  <img
-                    src={post.imageUrls[0]}
-                    alt="投稿画像"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    No Image
-                  </div>
-                )}
-                <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white px-2 py-1">
-                  <p className="text-xs truncate opacity-80">#{post.category}</p>
-                  <p className="text-sm font-semibold truncate">
-                    {post.matches?.[0]?.teamA} vs {post.matches?.[0]?.teamB}
-                  </p>
+    const japaneseCategory = categoryLabelMap[category] || category;
+
+    return (
+      <div key={category} className="mb-8">
+        <h2 className="text-base font-bold mt-6 mb-2 px-1 text-gray-800">{japaneseCategory}</h2>
+
+        <div className="overflow-x-visible">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 w-full">
+            {posts.slice(0, 6).map((post) => (
+              <Link href={`/posts/${post.id}`} key={post.id} className="block">
+                <div className="relative aspect-square rounded overflow-hidden shadow-sm bg-gray-100">
+                  {post.imageUrls?.[0] ? (
+                    <img
+                      src={post.imageUrls[0]}
+                      alt="投稿画像"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      No Image
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white px-2 py-1">
+                    <p className="text-xs truncate opacity-80">#{japaneseCategory}</p>
+                    <p className="text-sm font-semibold truncate">
+                      {post.matches?.[0]?.teamA} vs {post.matches?.[0]?.teamB}
+                         </p>
                 </div>
               </div>
             </Link>
@@ -126,8 +131,16 @@ export default function HomePage() {
         </div>
       </div>
     </div>
-  ))}
+  );
+})}
+
+
+  {/* ✅ Tailwindが効いているかのテスト用ブロック */}
+  <div className="text-red-500 md:text-green-500 text-center mt-10">
+    Tailwindテスト：スマホなら赤、PCなら緑
+  </div>
 </div>
+
 
 
     {/* フッター */}
