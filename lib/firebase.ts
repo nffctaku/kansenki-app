@@ -5,7 +5,7 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth'; // 👈 追加
 
 const firebaseConfig = {
   apiKey: "AIzaSyCQTD4CHS3QfLHG04wJ36CWRgKfqP9F-WY",
-  authDomain: "kansenki-app.firebaseapp.com",
+  authDomain: "kansenki-app.vercel.app",
   projectId: "kansenki-app",
   storageBucket: "kansenki-app.firebasestorage.app",
   messagingSenderId: "33484980781",
