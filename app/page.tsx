@@ -126,23 +126,24 @@ const groupedByCategory = posts.reduce((acc, post) => {
         };
         const japaneseCategory = categoryLabelMap[category] || category;
 
-        return (
-          <div key={category} className="mb-8">
-            <h2 className="text-base font-bold mt-6 mb-2 px-1 text-gray-800">{japaneseCategory}</h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              {posts.slice(0, 6).map((post) => (
-                <div key={post.id} className="bg-gray-100 rounded p-2">
-                  <div className="aspect-square bg-white overflow-hidden">
-                    {post.imageUrls?.[0] ? (
-                      <img
-                        src={post.imageUrls[0]}
-                        alt="投稿画像"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        No Image
-                      </div>
+       return (
+  <div key={category} className="mb-8">
+    <h2 className="text-base font-bold mt-6 mb-2 px-1 text-gray-800">{japaneseCategory}</h2>
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      {posts.slice(0, 6).map((post) => (
+        <div key={post.id} className="bg-gray-100 rounded p-2">
+          <div className="aspect-square bg-white overflow-hidden relative">
+            {post.imageUrls?.[0] ? (
+              <Image
+                src={post.imageUrls[0]}
+                alt="投稿画像"
+                fill
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                No Image
+              </div>
                     )}
                   </div>
                   <div className="mt-1 text-sm text-gray-700 font-semibold">

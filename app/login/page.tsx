@@ -2,26 +2,34 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signInWithPopup, browserLocalPersistence, setPersistence } from 'firebase/auth';
+import { signInWithRedirect, getRedirectResult, browserLocalPersistence, setPersistence } from 'firebase/auth';
 import { auth, provider } from '@/lib/firebase';
 
 export default function LoginPage() {
   const router = useRouter();
 
+  useEffect(() => {
+    // 認証後の結果取得
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          console.log('✅ ログイン成功:', result.user);
+          router.push('/mypage'); // ログイン成功後のリダイレクト
+        }
+      })
+      .catch((err) => {
+        console.error('❌ リダイレクト失敗:', err);
+        alert('ログインに失敗しました');
+      });
+  }, []);
+
   const handleLogin = async () => {
     try {
       await setPersistence(auth, browserLocalPersistence);
-      const result = await signInWithPopup(auth, provider);
-
-      if (result?.user) {
-        console.log('✅ ログイン成功:', result.user);
-        window.location.href = '/mypage'; // ← router.push でなく直接遷移してみる
-      } else {
-        console.warn('⚠ ログイン成功したが user が取れない');
-      }
+      await signInWithRedirect(auth, provider);
     } catch (err) {
-      console.error('❌ signInWithPopup 失敗:', err);
-      alert('ログイン中にエラーが発生しました');
+      console.error('❌ signInWithRedirect 失敗:', err);
+      alert('ログインエラーが発生しました');
     }
   };
 
@@ -37,3 +45,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
