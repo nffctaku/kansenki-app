@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 type Travel = {
   id: string;
@@ -22,6 +24,8 @@ type Travel = {
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Travel[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -38,13 +42,26 @@ export default function HomePage() {
       });
       setPosts(data.reverse());
     };
-
     fetchPosts();
   }, []);
 
-  // カテゴリごとにグループ化
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handlePostClick = () => {
+    if (isLoggedIn) {
+      router.push('/form');
+    } else {
+      router.push('/login');
+    }
+  };
+
   const groupedByCategory = posts.reduce((acc, post) => {
-    const category = post.category || 'その他';
+    const category = post.category || 'other';
     if (!acc[category]) acc[category] = [];
     acc[category].push(post);
     return acc;
@@ -52,25 +69,16 @@ export default function HomePage() {
 
   return (
   <div className="bg-white min-h-screen">
-    <div className="text-red-500 md:text-green-500 p-4">
-  Tailwind テストテキスト
-</div>
-
     {/* ヘッダー */}
     <header className="border-b shadow-sm py-4 px-6 flex justify-between items-center">
-      <div className="flex items-center space-x-3">
-        <h1 className="text-2xl font-bold">初現地観戦記</h1>
-      </div>
+      <h1 className="text-2xl font-bold">初現地観戦記</h1>
       <div className="flex items-center space-x-4">
-        <Link href="/login" className="text-sm text-gray-700 hover:underline flex items-center h-full">
-          ログイン
-        </Link>
-        <Link
-          href="/form"
+        <button
+          onClick={handlePostClick}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm flex items-center"
         >
           投稿する
-        </Link>
+        </button>
       </div>
     </header>
 
@@ -84,64 +92,53 @@ export default function HomePage() {
       <button className="bg-gray-800 text-white px-4 py-2 rounded">検索</button>
     </div>
 
-{/* カテゴリ別投稿一覧 */}
-<div className="w-screen px-4 mt-6">
-  {Object.entries(groupedByCategory).map(([category, posts]) => {
-    // ✅ 英語カテゴリ名を日本語に変換
-    const categoryLabelMap: Record<string, string> = {
-      england: 'イングランド',
-      italy: 'イタリア',
-      spain: 'スペイン',
-      germany: 'ドイツ',
-      france: 'フランス',
-      other: 'その他',
-    };
+    {/* カテゴリ別投稿一覧 */}
+    <div className="w-screen px-4 mt-6">
+      {Object.entries(groupedByCategory).map(([category, posts]) => {
+        const categoryLabelMap: Record<string, string> = {
+          england: 'イングランド',
+          italy: 'イタリア',
+          spain: 'スペイン',
+          germany: 'ドイツ',
+          france: 'フランス',
+          other: 'その他',
+        };
+        const japaneseCategory = categoryLabelMap[category] || category;
 
-    const japaneseCategory = categoryLabelMap[category] || category;
-
-    return (
-      <div key={category} className="mb-8">
-        <h2 className="text-base font-bold mt-6 mb-2 px-1 text-gray-800">{japaneseCategory}</h2>
-
-        <div className="overflow-x-visible">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 w-full">
-            {posts.slice(0, 6).map((post) => (
-              <Link href={`/posts/${post.id}`} key={post.id} className="block">
-                <div className="relative aspect-square rounded overflow-hidden shadow-sm bg-gray-100">
-                  {post.imageUrls?.[0] ? (
-                    <img
-                      src={post.imageUrls[0]}
-                      alt="投稿画像"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      No Image
-                    </div>
-                  )}
-                  <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white px-2 py-1">
-                    <p className="text-xs truncate opacity-80">#{japaneseCategory}</p>
-                    <p className="text-sm font-semibold truncate">
-                      {post.matches?.[0]?.teamA} vs {post.matches?.[0]?.teamB}
-                         </p>
+        return (
+          <div key={category} className="mb-8">
+            <h2 className="text-base font-bold mt-6 mb-2 px-1 text-gray-800">{japaneseCategory}</h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {posts.slice(0, 6).map((post) => (
+                <div key={post.id} className="bg-gray-100 rounded p-2">
+                  <div className="aspect-square bg-white overflow-hidden">
+                    {post.imageUrls?.[0] ? (
+                      <img
+                        src={post.imageUrls[0]}
+                        alt="投稿画像"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        No Image
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-1 text-sm text-gray-700 font-semibold">
+                    {post.matches?.[0]?.teamA} vs {post.matches?.[0]?.teamB}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
-  );
-})}
 
-
-  {/* ✅ Tailwindが効いているかのテスト用ブロック */}
-  <div className="text-red-500 md:text-green-500 text-center mt-10">
-    Tailwindテスト：スマホなら赤、PCなら緑
-  </div>
-</div>
-
-
+    {/* Tailwind確認用 */}
+    <div className="text-red-500 md:text-green-500 text-center mt-10">
+      Tailwind テスト：スマホなら赤、PCなら緑
+    </div>
 
     {/* フッター */}
     <footer className="mt-12 py-8 text-center space-y-4 text-sm text-gray-600">
@@ -153,8 +150,12 @@ export default function HomePage() {
         className="mx-auto"
       />
       <div className="flex justify-center space-x-6">
-        <a href="https://x.com/footballtop_jp" target="_blank" rel="noopener noreferrer" className="hover:underline">X</a>
-        <a href="https://note.com/football_top" target="_blank" rel="noopener noreferrer" className="hover:underline">Note</a>
+        <a href="https://x.com/footballtop_jp" target="_blank" rel="noopener noreferrer" className="hover:underline">
+          X
+        </a>
+        <a href="https://note.com/football_top" target="_blank" rel="noopener noreferrer" className="hover:underline">
+          Note
+        </a>
       </div>
       <p className="text-xs text-gray-400">© 2025 FOOTBALLTOP. All rights reserved.</p>
     </footer>
